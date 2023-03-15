@@ -1,7 +1,7 @@
 pipeline {
   agent any
   environment {
-    GITSERVER = "https://bitbucket.contoso.com/scm/MYPROJECT/"
+    GITSERVER = "https://github.com/lakpry/Terraform_exercise.git"
     // Override this variable which is used by Git to store the global configuration - https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables
     HOME = "${env.WORKSPACE}/gitconfig"
   }
@@ -30,7 +30,7 @@ pipeline {
         dir ('gitconfig') {
           withCredentials([usernamePassword(credentialsId: 'MYCREDENTIALS', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
             bat(script:"""
-                        git config --global url."https://${GIT_USERNAME}:${GIT_PASSWORD}@bitbucket.contoso.com/".insteadOf "https://bitbucket.contoso.com/"
+                        git config --global url."https://github.com/lakpry/Terraform_exercise.git"
                         """)
           }
         }
