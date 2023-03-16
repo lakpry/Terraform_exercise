@@ -1,50 +1,38 @@
-pipeline {
-  agent any
-  environment {
-    GITSERVER = "https://github.com/lakpry/Terraform_exercise.git"
-    // Override this variable which is used by Git to store the global configuration - https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables
-    HOME = "${env.WORKSPACE}/gitconfig"
-  }
-  stages {
-    stage('Initialize') {
-      steps {
-        RepositoryUrl = "${GITSERVER}/MYREPOSITORY"
-        
-        bat(returnOutput: true, script: 'terraform -v')
-        bat(returnOutput: true, script: 'terragrunt -v')
-      }
-    }
-    stage('checkout repo') {
-      steps {
-        checkout(changelog: false,
-                 poll: false,
-                 scm: [$class: 'GitSCM',
-                      branches: [[name: '*/master']],
-                      doGenerateSubmoduleConfigurations: false,
-                      extensions: [],
-                      submoduleCfg: [],
-                      userRemoteConfigs: [[credentialsId: 'MYCREDENTIALS',
-                                          url: "${RepositoryUrl}"]]])
 
-        // Add a configuration to override git URLs when commands execute such that we can inject the username/password into the URLs for auth
-        dir ('gitconfig') {
-          withCredentials([usernamePassword(credentialsId: 'MYCREDENTIALS', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-            bat(script:"""
-                        git config --global url."https://github.com/lakpry/Terraform_exercise.git"
-                        """)
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+            checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/lakpry/Terraform_exercise.git']]])            
+
           }
         }
-      }
+        
+        stage ("terraform init") {
+            steps {
+                sh ('terraform init') 
+            }
+        }
+        stage ("terraform validate") {
+            steps {
+                echo "Terraform action is --> validate"
+                sh ('terraform validate') 
+           }
+        }
+        stage ("terraform plan") {
+            steps {
+                echo "Terraform action is --> plan"
+                sh ('terraform plan') 
+           }
+        }
+
+        stage ("terraform apply") {
+            steps {
+                echo "Terraform action is --> apply"
+                sh ('terraform apply --auto-approve') 
+           }
+        }
     }
-    stage('terraform init') {
-      steps {
-        bat(returnOutput: true, script: 'terragrunt init')
-      }
-    }
-  }
-  post {
-    always {
-      echo 'I will always say Hello again!'
-    }
-  }
 }
