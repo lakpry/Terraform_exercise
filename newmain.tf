@@ -9,12 +9,7 @@ terraform {
 
 provider "aws" {
   region = "us-west-2"
-  assume_role {
-    role_arn     = "arn:aws:iam::961602455169:role/ec2role"
-    session_name = "SESSION_NAME"
-    external_id  = "EXTERNAL_ID"
   }
-}
 
 resource "aws_instance" "web" {
   ami = "ami-0df24e148fdb9f1d8"
